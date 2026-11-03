@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Serilog;
 using Serilog.Events;
@@ -11,6 +11,9 @@ namespace Deployer.Console
         private static async Task Main(string[] args)
         {
             ConfigureLogging();
+
+            // v4: Log core architecture, AMD Shell, and Lumia support info
+            ArchitectureDetector.LogArchitectureInfo();
 
             var consoleSession = DeployerConsoleSessionFactory.Create();
             await consoleSession.Run(args);
