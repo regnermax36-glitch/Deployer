@@ -54,7 +54,8 @@ class Build : NukeBuild
         .Executes(() =>
         {
             var desktopProject = Solution.AllProjects.First(project => project.Name.EndsWith("Desktop"));
-            var runtimes = new[] { "win-x64", };
+            // v4: Support both AMD64 (x64) and ARM64 architectures
+            var runtimes = new[] { "win-x64", "win-arm64" };
 
             DotNetPublish(settings => settings
                 .SetConfiguration(Configuration)
