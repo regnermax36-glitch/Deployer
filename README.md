@@ -1,45 +1,55 @@
-# Deployer formerly WOA Deployer
- ![Xzibit](Docs/xzibit.png)
+# Deployer v4
+[![Build](https://github.com/regnermax36-glitch/Deployer/actions/workflows/build.yml/badge.svg)](https://github.com/regnermax36-glitch/Deployer/actions/workflows/build.yml)
+
+![Xzibit](Docs/xzibit.png)
 
 ## OK, what's this?
 
 "Deploy your deployment while you deploy"
 
-> Deployer is a generic tool to automate deployments
+> Deployer v4 is a modernized generic tool to automate complex deployments across architectures.
 
-Take a look to this sexy screenshot
+## v4 Highlights
 
-![image](https://github.com/SuperJMN/Deployer/assets/3109851/6af7de3a-6989-4f21-aee2-e030694101c5)
+- **Multi-Architecture Support**: Full support for AMD64 (x64) and ARM64 Shell and GUI modes.
+- **CoreOS Architecture**: Modular core OS deployment architecture ready for CoreOS-style and custom system images (expandable).
+- **Windows to Lumia Applying**: Enhanced tools for applying Windows 10/11 ARM64 (and AMD64) images to Lumia 950/950XL and similar devices, with improved partitioning, driver injection, and boot configuration.
+- **Powerful Shell & Scripting**: Advanced console Shell with Iridio scripting, progress UI, and extensible functions for disk, filesystem, DISM imaging, and more.
+- **Avalonia GUI**: Cross-platform ready desktop application.
+- **CI Workflow**: Automated GitHub Actions builds producing ready-to-use packages.
+- And so much more: better error handling, modern .NET, packaging for Windows, extensible device support (RPi, phones, SOCs).
 
 ## How is this useful?
 
-This allows you to install **Windows on ARM** into esoteric devices like the Lumia 950 phones or SOCs like Raspberry Pi.
+This allows you to install **Windows on ARM** (or other OS) into esoteric devices like the Lumia 950 phones or SOCs like Raspberry Pi.
 
-Although Deployer 3 has been reimagined and redesigned to handle almost every kind of deployment you might think of.
+Deployer v4 builds on the reimagined Deployer 3 foundation to handle almost every kind of deployment you might think of, with a solid core architecture.
 
 ## **Super easy to use. No-hassle.**
 
 Please keep reading carefully. All you need is here.
 
-- One of the supported devices	
-- A Windows 10/11 ARM64 Image (.wim). Please, check [this link](https://github.com/WOA-Project/guides/blob/master/GettingWOA.md) to get it.
+- One of the supported devices
+- A Windows 10/11 ARM64 (or AMD64) Image (.wim). Please, check [this link](https://github.com/WOA-Project/guides/blob/master/GettingWOA.md) to get it.
 
 ### Additional requirements
-- To run Deployer you need a recent version of Windows 10 (please, use the latest to ensure it'll run correctly, don't open issues otherwise)
-- The .NET 6 runtime. Download it from [here](https://dotnet.microsoft.com/download/dotnet/6.0)
+- To run Deployer you need a recent version of Windows 10/11
+- The .NET 7 runtime (or self-contained builds from CI)
 
 # Download it!
 
-Download the latest version [here](https://github.com/SuperJMN/Deployer/releases)
+Download the latest version from the [Releases](https://github.com/regnermax36-glitch/Deployer/releases) or grab artifacts from the [CI builds](https://github.com/regnermax36-glitch/Deployer/actions).
 
 # Executing the tool
 1. Extract the .zip
-3. Find Deployer.Desktop.exe file
-4. Run it (you will be prompted for admin rights)
+2. Find Deployer.Desktop.exe file
+3. Run it (you will be prompted for admin rights)
+
+Or use the Console Shell for scripted deployments.
 
 # Show the love 🧡
 
-If you feel this project has been useful for you, please, consider supporting it by [sponsoring me (@SuperJMN)](https://github.com/sponsors/SuperJMN). You can donate any amount (one time or monthly). Thanks a lot to all my donors!
+If you feel this project has been useful for you, please, consider supporting the original authors and contributors.
 
 # Need help?
 For Lumia phones: don't hesitate to join our great [Telegram group 📱](https://t.me/joinchat/Ey6mehEPg0Fe4utQNZ9yjA)
