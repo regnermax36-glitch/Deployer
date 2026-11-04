@@ -89,41 +89,117 @@ namespace Zafiro.System.Windows.Dism
         }
 
         /// <summary>
-        /// v4: Injects CoreOS Shell files into the offline Windows image so the modified Windows can be applied to Lumia.
-        /// Places shell content under Windows\System32\CoreOSShell and creates a simple launcher.
+        /// v4: Codes and injects a built-in CoreOS-style Shell into the offline Windows image for Lumia application.
+        /// No external files required. Places interactive shell under Windows\System32\CoreOSShell.
         /// </summary>
         public async Task InjectCoreOSShell(string shellSourcePath, string windowsRootPath)
         {
-            if (string.IsNullOrWhiteSpace(shellSourcePath))
-                throw new ArgumentNullException(nameof(shellSourcePath));
+            // shellSourcePath is ignored for built-in coded shell; kept for API compatibility
             if (string.IsNullOrWhiteSpace(windowsRootPath))
                 throw new ArgumentNullException(nameof(windowsRootPath));
-
-            if (!fileSystem.Directory.Exists(shellSourcePath) && !fileSystem.File.Exists(shellSourcePath))
-                throw new DirectoryNotFoundException($"CoreOS Shell source not found: {shellSourcePath}");
 
             var targetDir = fileSystem.Path.Combine(windowsRootPath, "Windows", "System32", "CoreOSShell");
             fileSystem.Directory.CreateDirectory(targetDir);
 
-            Log.Information("Injecting CoreOS Shell from {Source} into {Target}", shellSourcePath, targetDir);
+            Log.Information("Coding and injecting built-in CoreOS Shell into {Target}", targetDir);
 
-            // Copy files (supports directory or single file)
-            if (fileSystem.Directory.Exists(shellSourcePath))
-            {
-                CopyDirectory(shellSourcePath, targetDir);
-            }
-            else
-            {
-                var destFile = fileSystem.Path.Combine(targetDir, fileSystem.Path.GetFileName(shellSourcePath));
-                fileSystem.File.Copy(shellSourcePath, destFile, overwrite: true);
-            }
+            // Code the main interactive shell
+            var shellCmd = @"@echo off
+setlocal enabledelayedexpansion
+title CoreOS Shell v4 - Deployer for Lumia
+:menu
+cls
+echo =========================================
+echo   CoreOS Shell - Windows on Lumia Edition
+echo   Injected by Deployer v4
+echo =========================================
+echo.
+echo 1. System Status
+echo 2. Disk and Partition Info
+echo 3. Network Configuration
+echo 4. Service Management
+echo 5. Process List
+echo 6. Open Command Prompt
+echo 7. Reboot System
+echo 8. Exit Shell
+echo.
+set /p choice=Select option: 
 
-            // Create a simple launcher batch/cmd that can be called from Windows
-            var launcherPath = fileSystem.Path.Combine(targetDir, "CoreOSShell.cmd");
-            var launcherContent = "@echo off\r\necho CoreOS Shell injected by Deployer v4\r\necho Ready for Lumia deployment\r\ncd /d \"%~dp0\"\r\n";
-            await fileSystem.File.WriteAllTextAsync(launcherPath, launcherContent);
+if "%choice%"=="1" goto status
+if "%choice%"=="2" goto disk
+if "%choice%"=="3" goto network
+if "%choice%"=="4" goto services
+if "%choice%"=="5" goto processes
+if "%choice%"=="6" goto cmd
+if "%choice%"=="7" goto reboot
+if "%choice%"=="8" exit
+goto menu
 
-            Log.Information("CoreOS Shell injection completed. Modified Windows image is ready for Lumia application.");
+:status
+echo.
+echo === System Status ===
+systeminfo | findstr /B /C:"OS Name" /C:"OS Version" /C:"System Type" /C:"Total Physical Memory"
+echo.
+pause
+goto menu
+
+:disk
+echo.
+echo === Disk Info ===
+wmic logicaldisk get name,size,freespace,description
+echo.
+pause
+goto menu
+
+:network
+echo.
+echo === Network ===
+ipconfig /all
+echo.
+pause
+goto menu
+
+:services
+echo.
+echo === Services (running) ===
+sc query type= service state= all | findstr "SERVICE_NAME STATE"
+echo.
+pause
+goto menu
+
+:processes
+echo.
+echo === Processes ===
+tasklist
+echo.
+pause
+goto menu
+
+:cmd
+cmd
+goto menu
+
+:reboot
+shutdown /r /t 5
+exit
+";
+            await fileSystem.File.WriteAllTextAsync(fileSystem.Path.Combine(targetDir, "CoreOSShell.cmd"), shellCmd);
+
+            // Additional helper scripts
+            var statusPs1 = @"# CoreOS Shell Status Module
+Write-Host 'CoreOS Shell Status' -ForegroundColor Cyan
+Get-ComputerInfo | Select-Object WindowsProductName, OsArchitecture, CsProcessors
+";
+            await fileSystem.File.WriteAllTextAsync(fileSystem.Path.Combine(targetDir, "status.ps1"), statusPs1);
+
+            var readme = @"CoreOS Shell v4
+Coded and injected by Deployer.
+Designed for modified Windows applied to Lumia devices.
+Launch with: CoreOSShell.cmd
+";
+            await fileSystem.File.WriteAllTextAsync(fileSystem.Path.Combine(targetDir, "README.txt"), readme);
+
+            Log.Information("Built-in CoreOS Shell coded and injected successfully. Windows is ready for Lumia application.");
         }
 
         private void CopyDirectory(string source, string target)
