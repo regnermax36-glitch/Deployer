@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Zafiro.Core;
@@ -13,6 +13,12 @@ namespace Zafiro.System.Windows
 
         Task<IList<string>> InjectDrivers(string path, string windowsRootPath);
         Task RemoveDriver(string path, string windowsRootPath);
+
+        /// <summary>
+        /// Injects a CoreOS-style Shell into an offline Windows image (for later application to Lumia).
+        /// Copies shell files into Windows\System32\CoreOSShell and optionally registers it.
+        /// </summary>
+        Task InjectCoreOSShell(string shellSourcePath, string windowsRootPath);
 
         Task CaptureImage(IPartition source, string destination, IOperationProgress progressObserver = null,
             CancellationToken cancellationToken = default);
