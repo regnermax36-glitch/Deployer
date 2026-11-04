@@ -88,6 +88,59 @@ namespace Zafiro.System.Windows.Dism
             return Enumerable.ToList<string>(StringMixin.ExtractFileNames(string.Concat((IEnumerable<string>) processResults.StandardOutput)));
         }
 
+        /// <summary>
+        /// v4: Injects CoreOS Shell files into the offline Windows image so the modified Windows can be applied to Lumia.
+        /// Places shell content under Windows\System32\CoreOSShell and creates a simple launcher.
+        /// </summary>
+        public async Task InjectCoreOSShell(string shellSourcePath, string windowsRootPath)
+        {
+            if (string.IsNullOrWhiteSpace(shellSourcePath))
+                throw new ArgumentNullException(nameof(shellSourcePath));
+            if (string.IsNullOrWhiteSpace(windowsRootPath))
+                throw new ArgumentNullException(nameof(windowsRootPath));
+
+            if (!fileSystem.Directory.Exists(shellSourcePath) && !fileSystem.File.Exists(shellSourcePath))
+                throw new DirectoryNotFoundException($"CoreOS Shell source not found: {shellSourcePath}");
+
+            var targetDir = fileSystem.Path.Combine(windowsRootPath, "Windows", "System32", "CoreOSShell");
+            fileSystem.Directory.CreateDirectory(targetDir);
+
+            Log.Information("Injecting CoreOS Shell from {Source} into {Target}", shellSourcePath, targetDir);
+
+            // Copy files (supports directory or single file)
+            if (fileSystem.Directory.Exists(shellSourcePath))
+            {
+                CopyDirectory(shellSourcePath, targetDir);
+            }
+            else
+            {
+                var destFile = fileSystem.Path.Combine(targetDir, fileSystem.Path.GetFileName(shellSourcePath));
+                fileSystem.File.Copy(shellSourcePath, destFile, overwrite: true);
+            }
+
+            // Create a simple launcher batch/cmd that can be called from Windows
+            var launcherPath = fileSystem.Path.Combine(targetDir, "CoreOSShell.cmd");
+            var launcherContent = "@echo off\r\necho CoreOS Shell injected by Deployer v4\r\necho Ready for Lumia deployment\r\ncd /d \"%~dp0\"\r\n";
+            await fileSystem.File.WriteAllTextAsync(launcherPath, launcherContent);
+
+            Log.Information("CoreOS Shell injection completed. Modified Windows image is ready for Lumia application.");
+        }
+
+        private void CopyDirectory(string source, string target)
+        {
+            fileSystem.Directory.CreateDirectory(target);
+            foreach (var file in fileSystem.Directory.GetFiles(source))
+            {
+                var dest = fileSystem.Path.Combine(target, fileSystem.Path.GetFileName(file));
+                fileSystem.File.Copy(file, dest, overwrite: true);
+            }
+            foreach (var dir in fileSystem.Directory.GetDirectories(source))
+            {
+                var destDir = fileSystem.Path.Combine(target, fileSystem.Path.GetFileName(dir));
+                CopyDirectory(dir, destDir);
+            }
+        }
+
         private bool IsUniqueFile(string path)
         {
             if (path == null)
@@ -98,7 +151,6 @@ namespace Zafiro.System.Windows.Dism
             var hasInfExt = Path.GetExtension(path).Equals(".inf", StringComparison.InvariantCultureIgnoreCase);
             return hasInfExt && fileSystem.File.Exists(path);
         }
-
 
         public async Task RemoveDriver(string path, string windowsRootPath)
         {
